@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Web Site Guardian v1</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="preference">Preference</string>
+    <string name="itemURL">Set URL Guard</string>
+    <string name="titleSiteURL">Set URL</string>
+
+</resources>
