@@ -11,7 +11,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -25,7 +24,7 @@ public class GuardService extends Service {
 	Guardian guardian;
 	private boolean runFlag = false; //
 	//DbHelper dbHelper;
-	SQLiteDatabase db;
+	//SQLiteDatabase db;
 	StatusData statusData;
 
 	@Override
@@ -47,10 +46,15 @@ public class GuardService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
-		this.runFlag = true;
-		this.guardian.start();
-		this.guardApp.setServiceRunning(true); //
-		Log.d(TAG, "onStarted");
+		if (this.runFlag == false) {
+			this.runFlag = true;
+			this.guardian.start();
+			this.guardApp.setServiceRunning(true); //
+			Log.d(TAG, "onStarted");
+		} else {
+			Log.d(TAG, "already Started");
+		}
+	
 		return START_STICKY;
 	}
 
@@ -58,9 +62,13 @@ public class GuardService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		this.runFlag = false;
-		if (timer != null) timer.cancel();
-		this.guardian.interrupt();
-		this.guardian = null;
+		if (timer != null) {
+			timer.cancel();
+		}
+		if (this.guardian != null) {
+			this.guardian.interrupt();
+			this.guardian = null;
+		}
 		this.guardApp.setServiceRunning(false); //
 		Log.d(TAG, "onDestroyed");
 	}
@@ -69,7 +77,7 @@ public class GuardService extends Service {
 		public void run() {
 			Log.i("MyTimer is", "Called");
 			HttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet(guardApp.prefs.getString("url", "http://sysiq.com"));
+			HttpGet request = new HttpGet(guardApp.getPrefs().getString("url", "http://sysiq.com"));
 			HttpResponse response = null;
 			try {
 				response = client.execute(request);

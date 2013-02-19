@@ -7,6 +7,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 public class StatusData { //
@@ -71,7 +72,29 @@ public class StatusData { //
 	 */
 	public Cursor getAllResponses() { //
 		SQLiteDatabase db = this.dbHelper.getReadableDatabase();
-		return db.query(TABLE, null, null, null, null, null, GET_ALL_ORDER_BY);
+		Cursor cursor = db.query(TABLE, null, null, null, null, null, GET_ALL_ORDER_BY);
+		return cursor;
+	}
+	public Cursor getFailureResponses() { //
+		SQLiteDatabase db = this.dbHelper.getReadableDatabase();
+		Cursor cursor = db.query(TABLE, null, C_CODE + "!= 200", null, null, null, GET_ALL_ORDER_BY);
+		return cursor;
+	}
+	
+	public long getAllCount() { //
+		SQLiteDatabase db = this.dbHelper.getReadableDatabase();
+		String sql = "SELECT COUNT(*) FROM " + TABLE;
+	    SQLiteStatement statement = db.compileStatement(sql);
+	    long count = statement.simpleQueryForLong();
+	    return count;
+	}
+	
+	public long getFailuresCount() { //
+		SQLiteDatabase db = this.dbHelper.getReadableDatabase();
+		String sql = "SELECT COUNT(*) FROM " + "(SELECT * FROM " + TABLE + " WHERE " + C_CODE + " != 200)";
+	    SQLiteStatement statement = db.compileStatement(sql);
+	    long count = statement.simpleQueryForLong();
+	    return count;
 	}
 
 	/**

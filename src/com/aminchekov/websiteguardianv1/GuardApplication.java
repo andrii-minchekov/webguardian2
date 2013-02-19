@@ -10,7 +10,7 @@ import android.util.Log;
 public class GuardApplication extends Application implements OnSharedPreferenceChangeListener{
 
 	private static final String TAG = GuardApplication.class.getSimpleName();
-	public SharedPreferences prefs;
+	private SharedPreferences prefs;
 	private boolean serviceRunning; //
 
 	public boolean isServiceRunning() { //
@@ -39,5 +39,9 @@ public class GuardApplication extends Application implements OnSharedPreferenceC
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
 		
+	}
+
+	public SharedPreferences getPrefs() {
+		return prefs;
 	}
 }

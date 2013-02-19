@@ -6,5 +6,9 @@
     <string name="preference">Preference</string>
     <string name="itemURL">Set URL Guard</string>
     <string name="titleSiteURL">Set URL</string>
+    <string name="history">Checks history</string>
+    <string name="availability">Availability chart</string>
+    <string name="titleAvailability">Availability chart</string>
+    <string name="msgSetupPrefs">Go to Preferences and setup URL for guarding</string>
 
 </resources>
