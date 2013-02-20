@@ -146,12 +146,14 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		if (isChecked) {
-			showAll = true;
-			setupAllList();
-		} else {
-			showAll = false;
-			setupFailuresList();
+		if (buttonView.getId() == R.id.switch1) {
+			if (isChecked) {
+				showAll = true;
+				setupAllList();
+			} else {
+				showAll = false;
+				setupFailuresList();
+			}
 		}
 	}
 

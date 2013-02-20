@@ -23,27 +23,6 @@ public class StatusData { //
 			+ StatusData.C_CREATED_AT + ")" };
 	private static final String[] DB_TEXT_COLUMNS = { C_CODE };
 
-	// DbHelper implementations
-	class DbHelper extends SQLiteOpenHelper {
-		public DbHelper(Context context) {
-			super(context, DATABASE, null, VERSION);
-		}
-
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			Log.i(TAG, "Creating database: " + DATABASE);
-			db.execSQL("create table " + TABLE + " (" + C_ID
-					+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + C_CREATED_AT + " INTEGER, " + C_CODE
-					+ " INTEGER)");
-		}
-
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			db.execSQL("drop table " + TABLE);
-			this.onCreate(db);
-		}
-	}
-
 	public final DbHelper dbHelper; //
 
 	public StatusData(Context context) { //
@@ -146,6 +125,27 @@ public class StatusData { //
 			}
 		} finally {
 			db.close();
+		}
+	}
+	
+	// DbHelper implementations
+	private class DbHelper extends SQLiteOpenHelper {
+		private DbHelper(Context context) {
+			super(context, DATABASE, null, VERSION);
+		}
+
+		@Override
+		public void onCreate(SQLiteDatabase db) {
+			Log.i(TAG, "Creating database: " + DATABASE);
+			db.execSQL("create table " + TABLE + " (" + C_ID
+					+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + C_CREATED_AT + " INTEGER, " + C_CODE
+					+ " INTEGER)");
+		}
+
+		@Override
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			db.execSQL("drop table " + TABLE);
+			this.onCreate(db);
 		}
 	}
 }
