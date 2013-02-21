@@ -49,6 +49,7 @@ public final class R {
         public static final int history=0x7f050005;
         public static final int itemURL=0x7f050003;
         public static final int msgSetupPrefs=0x7f050008;
+        public static final int no_data=0x7f050009;
         public static final int preference=0x7f050002;
         public static final int titleAvailability=0x7f050007;
         public static final int titleSiteURL=0x7f050004;

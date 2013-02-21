@@ -8,6 +8,10 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.aminchekov.websiteguardianv1.database.StatusData;
+import com.aminchekov.websiteguardianv1.provider.GuardContentProvider;
+
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -95,7 +99,8 @@ public class GuardService extends Service {
 			values.clear(); //
 			values.put(StatusData.C_CREATED_AT, System.currentTimeMillis());
 			values.put(StatusData.C_CODE, statusCode);
-			statusData.insertOrIgnore(values);
+			getContentResolver().insert(GuardContentProvider.Responses.CONTENT_URI, values);
+			//statusData.insertOrIgnore(values);
 			//activityInstance.new UpdateResponse().execute(statusData.getLatestGuard());
 		} 
 	}

@@ -32,6 +32,9 @@
         
         <service android:name=".GuardService" />
         
+        <provider android:name="com.aminchekov.websiteguardianv1.provider.GuardContentProvider"
+	        android:authorities="com.aminchekov.websiteguardianv1.provider" />
+        
     </application>
 
 </manifest>

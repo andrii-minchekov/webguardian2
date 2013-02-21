@@ -10,5 +10,6 @@
     <string name="availability">Availability chart</string>
     <string name="titleAvailability">Availability chart</string>
     <string name="msgSetupPrefs">Go to Preferences and setup URL for guarding</string>
+    <string name="no_data">has no Failures Responses</string>
 
 </resources>

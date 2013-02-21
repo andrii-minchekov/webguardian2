@@ -1,9 +1,16 @@
 package com.aminchekov.websiteguardianv1;
 
 import java.util.Date;
+
+import com.aminchekov.websiteguardianv1.database.StatusData;
+import com.aminchekov.websiteguardianv1.provider.GuardContentProvider;
+
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.text.format.DateUtils;
 import android.view.Menu;
@@ -19,12 +26,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener,
-		CompoundButton.OnCheckedChangeListener {
+		CompoundButton.OnCheckedChangeListener,
+		LoaderManager.LoaderCallbacks<Cursor> {
 
 	StatusData statusData;
 	GuardApplication guardApp;
 	Cursor cursor;
+	CursorLoader cursorLoader;
 	ListView listTimeline;
+	TextView noDataText;
 	SimpleCursorAdapter adapter;
 	static final String[] FROM = { StatusData.C_CREATED_AT, StatusData.C_CODE };
 	static final int[] TO = { R.id.responseTime, R.id.responseCode };
@@ -38,6 +48,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		setContentView(R.layout.activity_main);
 		// Find your views
 		listTimeline = (ListView) findViewById(R.id.listTimeline);
+		noDataText = (TextView) findViewById(android.R.id.empty);
 		// Check whether preferences have been set
 		if (guardApp.getPrefs().getString("url", null) == null) { //
 			startActivity(new Intent(this, PrefsActivity.class)); //
@@ -48,21 +59,23 @@ public class MainActivity extends Activity implements OnClickListener,
 		if (s != null) {
 			s.setOnCheckedChangeListener(this);
 		}
-
+		getLoaderManager().initLoader(0, null, this);
+		adapter = new SimpleCursorAdapter(getApplicationContext(),
+				R.layout.row, null, FROM, TO, 0);
+		adapter.setViewBinder(VIEW_BINDER); //
+		listTimeline.setAdapter(adapter);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// Setup List
-		displayData();
+		refreshData(showAll);
+
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		// Close the database
-		statusData.close(); //
 	}
 
 	@Override
@@ -93,66 +106,36 @@ public class MainActivity extends Activity implements OnClickListener,
 		} else if (v.getId() == R.id.stopGuard) {
 			// stop guard process and terminate running thread
 			stopService(new Intent(this, GuardService.class)); //
-		} else if (v.getId() == R.id.refreshDisplay) {
-			displayData();
+		} 
+		//not needed anymore cause happening automatically notification
+		else if (v.getId() == R.id.refreshDisplay) {
+			refreshData(showAll);
 		}
 	}
 
-	// Responsible for fetching data and setting up the list and the adapter
-	private void setupAllList() { //
-		// Get the data
-		cursor = statusData.getAllResponses();
-		startManagingCursor(cursor);
-		// Setup Adapter
-		adapter = new SimpleCursorAdapter(this, R.layout.row, cursor, FROM, TO);
-		adapter.setViewBinder(VIEW_BINDER); //
-		listTimeline.setAdapter(adapter);
+	public void refreshData(boolean showAll) {
+			cursorLoader.setSelection(selectData(showAll));
+			cursorLoader.forceLoad();
 	}
 
-	private void setupFailuresList() {
-		cursor = statusData.getFailureResponses();
-		startManagingCursor(cursor);
-		// Setup Adapter
-		adapter = new SimpleCursorAdapter(this, R.layout.row, cursor, FROM, TO);
-		adapter.setViewBinder(VIEW_BINDER); //
-		listTimeline.setAdapter(adapter);
+	public String selectData(boolean showAll) {
+		String selection = null;
+		if (showAll == false) {
+			selection = StatusData.C_CODE + "!=" + StatusData.STATUS_OK;
+		}
+		return selection;
 	}
 	
-	private void displayData() {
-		if (showAll == true) {
-			this.setupAllList();
-		} else {
-			this.setupFailuresList();
-		}
-	}
-
-	/*
-	 * private void displayData() { GuardObject guard =
-	 * statusData.getLatestGuard(); if (guard != null) { new
-	 * UpdateResponse().execute(guard); } }
-	 * 
-	 * 
-	 * class UpdateResponse extends AsyncTask<GuardObject, Integer, GuardObject>
-	 * {
-	 * 
-	 * @Override protected GuardObject doInBackground(GuardObject... params) {
-	 * GuardObject obj = params[0]; return obj; }
-	 * 
-	 * @Override protected void onPostExecute(GuardObject result) { // TextView
-	 * textView = (TextView) findViewById(R.id.textView1);
-	 * textView.setText("StatusCode: " + result.getResponseCode() + ", Date: " +
-	 * result.getTimestamp().toString()); } }
-	 */
-
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		if (buttonView.getId() == R.id.switch1) {
 			if (isChecked) {
 				showAll = true;
-				setupAllList();
+				refreshData(showAll);
+				// getLoaderManager().restartLoader(id, args, callback);
 			} else {
 				showAll = false;
-				setupFailuresList();
+				refreshData(showAll);
 			}
 		}
 	}
@@ -173,4 +156,31 @@ public class MainActivity extends Activity implements OnClickListener,
 			return true;
 		}
 	};
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		// Provide here a Cursor data
+		// String[] projection = { StatusData.C_CREATED_AT, StatusData.C_CODE };
+		cursorLoader = new CursorLoader(getApplicationContext(),
+				GuardContentProvider.Responses.CONTENT_URI, null, null, null, null);
+		return cursorLoader;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		// CursorLoader provides a Cursor
+		adapter.swapCursor(cursor);
+		adapter.notifyDataSetChanged();
+		TextView messageEmptyCursor = (TextView) findViewById(android.R.id.empty);
+		if (adapter.getCount() <= 0 ) {
+			messageEmptyCursor.setText("Site " + guardApp.getPrefs().getString("url", null) + " " + getString(R.string.no_data));
+		}
+
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
+		// Release reference to the Cursor
+		adapter.swapCursor(null);
+	}
 }

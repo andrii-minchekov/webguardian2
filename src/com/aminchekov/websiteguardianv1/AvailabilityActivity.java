@@ -1,5 +1,7 @@
 package com.aminchekov.websiteguardianv1;
 
+import com.aminchekov.websiteguardianv1.database.StatusData;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
