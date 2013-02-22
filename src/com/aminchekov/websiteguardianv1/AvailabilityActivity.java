@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 public class AvailabilityActivity extends Activity{
 	
-	TextView allCount;
+	TextView allCount; 
 	TextView failureCount;
 	StatusData statusData;
 	
